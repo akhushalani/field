@@ -22,6 +22,7 @@ const COMMANDS: &[&str] = &[
 fn main() {
     #[cfg(target_os = "macos")]
     {
+        swift_link_compat::prepare_package("local-llm-swift");
         swift_rs::SwiftLinker::new("14.2")
             .with_package("local-llm-swift", "./swift-lib/")
             .link();

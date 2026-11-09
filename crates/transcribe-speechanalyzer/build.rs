@@ -56,6 +56,7 @@ fn main() {
             return;
         }
 
+        swift_link_compat::prepare_package("apple-speech-swift");
         swift_rs::SwiftLinker::new(SWIFT_MACOS_DEPLOYMENT_TARGET)
             .with_package("apple-speech-swift", "./swift-lib/")
             .link();

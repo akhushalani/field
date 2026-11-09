@@ -604,6 +604,7 @@ fn main() {
         let swift_build_dir = out_dir.join("swift-rs").join("soniqo-swift");
         prepare_swift_package(&swift_build_dir);
 
+        swift_link_compat::prepare_package("soniqo-swift");
         swift_rs::SwiftLinker::new(SONIQO_SWIFT_MACOS_DEPLOYMENT_TARGET)
             .with_package("soniqo-swift", "./swift-lib/")
             .link();

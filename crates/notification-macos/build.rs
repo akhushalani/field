@@ -5,6 +5,7 @@ mod swift_link_compat;
 fn main() {
     #[cfg(target_os = "macos")]
     {
+        swift_link_compat::prepare_package("notification-swift");
         swift_rs::SwiftLinker::new("14.2")
             .with_package("notification-swift", "./swift-lib/")
             .link();

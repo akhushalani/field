@@ -32,6 +32,7 @@ const COMMANDS: &[&str] = &[
 fn main() {
     #[cfg(target_os = "macos")]
     {
+        swift_link_compat::prepare_package("windows-swift");
         swift_rs::SwiftLinker::new("14.2")
             .with_package("windows-swift", "./swift-lib/")
             .link();
