@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 import { spawn, spawnSync } from "node:child_process";
+import { cpSync, mkdirSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { basename, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -60,7 +62,17 @@ function bundleField(binary) {
     { cwd: desktopDirectory, stdio: "inherit" },
   );
   if (bundle.status !== 0) process.exit(bundle.status ?? 1);
-  return resolve(dirname(resolve(binary)), "bundle/macos/Field Dev.app");
+  const runtimeDirectory = resolve(tmpdir(), "field-dev-runtime");
+  mkdirSync(runtimeDirectory, { recursive: true, mode: 0o700 });
+  const runtimeBundle = resolve(runtimeDirectory, "Field Dev.app");
+  // Documents can regain Finder metadata after cleanup, invalidating signatures.
+  rmSync(runtimeBundle, { recursive: true, force: true });
+  cpSync(
+    resolve(dirname(resolve(binary)), "bundle/macos/Field Dev.app"),
+    runtimeBundle,
+    { recursive: true, force: true },
+  );
+  return runtimeBundle;
 }
 
 function signBinary(binary) {
@@ -69,7 +81,7 @@ function signBinary(binary) {
       "com.apple.FinderInfo",
       "com.apple.ResourceFork",
     ]) {
-      const cleanup = spawnSync("xattr", ["-dr", attribute, binary], {
+      const cleanup = spawnSync("/usr/bin/xattr", ["-dr", attribute, binary], {
         stdio: "inherit",
       });
       if (cleanup.status !== 0) process.exit(cleanup.status ?? 1);
@@ -102,6 +114,14 @@ function signBinary(binary) {
 
   if (signing.status !== 0) {
     process.exit(signing.status ?? 1);
+  }
+  if (binary.endsWith(".app")) {
+    const verification = spawnSync(
+      "/usr/bin/codesign",
+      ["--verify", "--deep", "--strict", binary],
+      { stdio: "inherit" },
+    );
+    if (verification.status !== 0) process.exit(verification.status ?? 1);
   }
 }
 

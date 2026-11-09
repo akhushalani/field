@@ -21,7 +21,7 @@ The isolated launcher defaults to two Cargo jobs, no Rust debug symbols, and no 
 
 The launcher uses `ai.thrad.meetingboard.dev`, a separate development signing identity, and the corresponding development data directory. It disables Sentry, omits the analytics key, disables updater delivery and removes inherited CloudSync configuration. This isolation is for `tauri dev`; do not assume an ordinary release build uses the same data-directory rules. Do not point this fork at an existing Anarlog vault.
 
-On macOS, the isolated runner uses Tauri’s bundler to wrap the cached binary as **Field Dev.app**, then signs and launches that bundle. It still depends on the Vite development server, so start it through the launcher above. The named bundle supports macOS application discovery and the permission assistant’s app-icon drag action.
+On macOS, the isolated runner uses Tauri’s bundler to wrap the cached binary as **Field Dev.app**, copies it into the current user’s temporary directory, then signs, verifies and launches that runtime bundle. The runner clears Finder display metadata and verifies the signature immediately before launch; macOS may add display metadata again after application registration. Meeting data stays in the existing application-support directory. It still depends on the Vite development server, so start it through the launcher above. The named bundle supports macOS application discovery and the permission assistant’s app-icon drag action.
 
 The upstream `dev` feature also enables its existing file-backed audio provider. It remains inactive unless `MOCK_AUDIO` is set. For a silent synthetic capture test, set `MOCK_AUDIO=1`, `MOCK_PLAYBACK=0`, `ANLG_MOCK_MIC_AUDIO` to a generated speech file and `ANLG_MOCK_SPK_AUDIO` to a silence file before launching. This exercises the live stream without recording the room; it does not prove physical microphone or system-audio capture.
 
@@ -40,7 +40,7 @@ Board history lives in `local_meeting_board_revisions`, deliberately outside Clo
 ## Offline replay and verification
 
 ```sh
-pnpm -F @anlg/desktop test -- src/whiteboard --maxWorkers=1
+pnpm -F @anlg/desktop exec vitest run src/whiteboard --maxWorkers=1
 pnpm -F @anlg/desktop typecheck
 cargo check --locked -p anarlog-cli
 cargo test --locked -p db-app meeting_board_migration

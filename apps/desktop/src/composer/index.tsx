@@ -226,7 +226,7 @@ function ComposerInput({
             ])}
           >
             <ArrowUpRight className="size-3.5" />
-            {t`Open Anarlog`}
+            {t`Open Field`}
           </button>
           <button
             type="button"
