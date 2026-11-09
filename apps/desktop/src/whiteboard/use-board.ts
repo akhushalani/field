@@ -126,14 +126,23 @@ export function useBoard(meetingId: string, enabled: boolean) {
         const now = new Map(
           latest.current.evidence.map((item) => [item.id, item]),
         );
-        // Corrections/replacements invalidate affected results, but new speech needn't.
+        // A live excerpt may grow while the model runs. Preserve a result if its
+        // original words are still intact; corrections/removals invalidate it.
         const before = new Map(sources.map((item) => [item.id, item.text]));
-        if (
-          patch.upserts.some((idea) =>
-            idea.sourceIds.some((id) => now.get(id)?.text !== before.get(id)),
+        for (const idea of patch.upserts) {
+          for (const id of idea.sourceIds) {
+            if (!before.has(id)) throw new Error("Unknown request evidence");
+          }
+        }
+        // Removals and regroupings also depend on the original conversation.
+        for (const [id, original] of before) {
+          const currentText = now.get(id)?.text;
+          if (
+            currentText !== original &&
+            !currentText?.startsWith(`${original} `)
           )
-        )
-          return;
+            return;
+        }
         const next = applyModelPatch(current.current, patch, now);
         await commit(next);
         processed.current = fingerprint;
