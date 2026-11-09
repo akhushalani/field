@@ -100,7 +100,7 @@ function Preview() {
   return (
     <main className="flex h-screen flex-col gap-3 p-5">
       <div className="flex flex-wrap items-center gap-4 text-sm">
-        <strong>Thrad · replay preview</strong>
+        <strong>Field · replay preview</strong>
         <span className="mr-auto text-neutral-600">
           Sample transcript · no recording or model calls · changes last until
           refresh

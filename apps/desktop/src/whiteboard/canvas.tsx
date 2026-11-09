@@ -223,7 +223,7 @@ export default function BoardCanvas({
         viewModeEnabled
         zenModeEnabled
         theme="light"
-        name="Thrad meeting board"
+        name="Field meeting board"
         initialData={{ appState: { viewBackgroundColor: "#fafaf9" } }}
         UIOptions={{
           canvasActions: {

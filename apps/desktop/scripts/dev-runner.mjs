@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { spawn, spawnSync } from "node:child_process";
-import { dirname, resolve } from "node:path";
+import { basename, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const scriptPath = fileURLToPath(import.meta.url);
@@ -24,10 +24,43 @@ if (command === "run" || command === "build") {
   cargoArgs.push(command, ...args);
   runChild("cargo", cargoArgs);
 } else {
+  let executable = command;
   if (process.platform === "darwin") {
-    signBinary(command);
+    let signingTarget = command;
+    if (
+      process.env.ANARLOG_DEV_APP_IDENTIFIER === "ai.thrad.meetingboard.dev"
+    ) {
+      signingTarget = bundleField(command);
+      executable = resolve(signingTarget, "Contents/MacOS", basename(command));
+    }
+    signBinary(signingTarget);
   }
-  runChild(command, args);
+  runChild(executable, args);
+}
+
+function bundleField(binary) {
+  // A named .app gives the isolated pilot a stable macOS application identity.
+  const desktopDirectory = resolve(dirname(scriptPath), "..");
+  const bundle = spawnSync(
+    process.execPath,
+    [
+      resolve(desktopDirectory, "node_modules/@tauri-apps/cli/tauri.js"),
+      "bundle",
+      "--debug",
+      "--bundles",
+      "app",
+      "--features",
+      "direct-distribution,dev",
+      "--config",
+      "src-tauri/tauri.field.conf.json",
+      "--config",
+      JSON.stringify({ mainBinaryName: basename(binary) }),
+      "--no-sign",
+    ],
+    { cwd: desktopDirectory, stdio: "inherit" },
+  );
+  if (bundle.status !== 0) process.exit(bundle.status ?? 1);
+  return resolve(dirname(resolve(binary)), "bundle/macos/Field Dev.app");
 }
 
 function signBinary(binary) {
@@ -42,6 +75,7 @@ function signBinary(binary) {
     "codesign",
     [
       "--force",
+      ...(binary.endsWith(".app") ? ["--deep"] : []),
       "--sign",
       "-",
       "--identifier",

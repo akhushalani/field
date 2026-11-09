@@ -12,7 +12,7 @@ import { listenerStore } from "~/store/zustand/listener/instance";
 
 const PENDING_WELCOME_SESSION_KEY = "anarlog.pending-welcome-session";
 
-const WELCOME_NOTE = `Welcome to Anarlog 👋
+const WELCOME_NOTE = `Welcome to Field 👋
 
 
 This note is a quick way to see how Anarlog works.
@@ -105,7 +105,7 @@ async function findOrCreateWelcomeSession(): Promise<string> {
   const event: SessionEvent = {
     tracking_id: WELCOME_NOTE_TRACKING_ID,
     calendar_id: "",
-    title: "Welcome to Anarlog",
+    title: "Welcome to Field",
     started_at: now,
     ended_at: "",
     is_all_day: false,
@@ -114,7 +114,7 @@ async function findOrCreateWelcomeSession(): Promise<string> {
     description: "A private, prerecorded introduction to Anarlog.",
   };
 
-  return createSession("Welcome to Anarlog", DEFAULT_USER_ID, {
+  return createSession("Welcome to Field", DEFAULT_USER_ID, {
     event_json: JSON.stringify(event),
     raw_md: JSON.stringify(md2json(WELCOME_NOTE)),
   });

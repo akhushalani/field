@@ -1,3 +1,7 @@
+# Field
+
+Field adds a live meeting whiteboard to Anarlog. See [Field development setup](FIELD.md) for this fork’s implementation, verification status and isolated launch instructions. The upstream documentation follows.
+
 > **Note:** The team is now building **[char](https://char.com)**. The **anarlog** community application remains open-source, MIT-licensed, and maintained as the local-first meeting notetaker in this repo. Source-visible enterprise components are commercially licensed.
 
 <div align="center">

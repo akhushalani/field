@@ -23,7 +23,7 @@ if (process.platform === "darwin") {
   });
   if (cmake.status !== 0) {
     console.error(
-      "CMake missing. Install CMake and add it to PATH, or set CMAKE to its executable, before starting the native build. See THRAD.md.",
+      "CMake missing. Install CMake and add it to PATH, or set CMAKE to its executable, before starting the native build. See FIELD.md.",
     );
     process.exit(1);
   }
@@ -36,7 +36,7 @@ if (process.platform === "darwin") {
   });
   if (metal.status !== 0) {
     console.error(
-      "Metal compiler missing. Install Metal Toolchain in Xcode → Settings → Components before starting the native build. See THRAD.md.",
+      "Metal compiler missing. Install Metal Toolchain in Xcode → Settings → Components before starting the native build. See FIELD.md.",
     );
     process.exit(1);
   }
@@ -53,7 +53,7 @@ const child = spawn(
     "--features",
     "dev",
     "--config",
-    "src-tauri/tauri.thrad.conf.json",
+    "src-tauri/tauri.field.conf.json",
   ],
   {
     cwd: fileURLToPath(new URL("../", import.meta.url)),
