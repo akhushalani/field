@@ -64,6 +64,17 @@ function bundleField(binary) {
 }
 
 function signBinary(binary) {
+  if (binary.endsWith(".app")) {
+    for (const attribute of [
+      "com.apple.FinderInfo",
+      "com.apple.ResourceFork",
+    ]) {
+      const cleanup = spawnSync("xattr", ["-dr", attribute, binary], {
+        stdio: "inherit",
+      });
+      if (cleanup.status !== 0) process.exit(cleanup.status ?? 1);
+    }
+  }
   const identifier =
     process.env.ANARLOG_DEV_APP_IDENTIFIER || "com.hyprnote.dev";
   const scriptDirectory = dirname(scriptPath);
