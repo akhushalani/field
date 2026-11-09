@@ -1,3 +1,7 @@
+#[cfg(target_os = "macos")]
+#[path = "../../scripts/swift-link-compat.rs"]
+mod swift_link_compat;
+
 const COMMANDS: &[&str] = &[
     "window_show",
     "window_hide",
@@ -31,6 +35,7 @@ fn main() {
         swift_rs::SwiftLinker::new("14.2")
             .with_package("windows-swift", "./swift-lib/")
             .link();
+        swift_link_compat::link_configuration_output("windows-swift");
     }
 
     #[cfg(not(target_os = "macos"))]

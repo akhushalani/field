@@ -19,6 +19,8 @@ The launcher uses `ai.thrad.meetingboard.dev`, a separate development signing id
 
 The upstream `dev` feature also enables its existing file-backed audio provider. It remains inactive unless `MOCK_AUDIO` is set. For a silent synthetic capture test, set `MOCK_AUDIO=1`, `MOCK_PLAYBACK=0`, `ANLG_MOCK_MIC_AUDIO` to a generated speech file and `ANLG_MOCK_SPK_AUDIO` to a silence file before launching. This exercises the live stream without recording the room; it does not prove physical microphone or system-audio capture.
 
+On Xcode 27, SwiftPM places static libraries under `out/Products`. The shared `scripts/swift-link-compat.rs` helper adds SwiftPM’s stable `debug`/`release` alias to the linker search paths for all native Swift bridges, alongside the older paths emitted by the pinned swift-rs dependency.
+
 The development relay uses `http://127.0.0.1:1431` for this profile, independently of upstream's default relay port. The synthetic UI-only replay remains on port 1430.
 
 Configure a direct AI provider and model in the isolated app's AI settings. Credentials belong in the app, never in this repository or chat. Configure transcription separately if the selected speech provider requires it. Open a meeting, choose **Open meeting board**, and start updates when ready to send transcript excerpts and board content to the selected model. Upstream-hosted model connections are not used by this feature.
