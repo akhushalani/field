@@ -15,6 +15,16 @@ for (const key of Object.keys(env)) {
 }
 
 if (process.platform === "darwin") {
+  const cmake = spawnSync(env.CMAKE || "cmake", ["--version"], {
+    env,
+    stdio: "ignore",
+  });
+  if (cmake.status !== 0) {
+    console.error(
+      "CMake missing. Install CMake and add it to PATH, or set CMAKE to its executable, before starting the native build. See THRAD.md.",
+    );
+    process.exit(1);
+  }
   const developerDir = "/Applications/Xcode.app/Contents/Developer";
   if (!env.DEVELOPER_DIR && existsSync(developerDir))
     env.DEVELOPER_DIR = developerDir;

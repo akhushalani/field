@@ -7,7 +7,7 @@ This branch contains the semantic board engine, Cards and Canvas views, a live t
 
 ## Run the isolated app
 
-Use Node 22 or 24, pnpm 11.1.1, Rust 1.94.0, and the native prerequisites in the upstream README. On Apple Silicon, verify `xcrun -sdk macosx metal --version`; having Xcode alone is insufficient.
+Use Node 22 or 24, pnpm 11.1.1, Rust 1.94.0, CMake on PATH (or the `CMAKE` executable override), and the native prerequisites in the upstream README. On Apple Silicon, verify `xcrun -sdk macosx metal --version`; having Xcode alone is insufficient.
 
 ```sh
 pnpm install --frozen-lockfile
