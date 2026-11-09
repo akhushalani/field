@@ -6,6 +6,8 @@ debug = true
 [profile.dev.package."*"]
 opt-level = 1
 debug = false
+# Xcode 27 rejects stripped build-time dylibs with misaligned LINKEDIT pools.
+strip = "none"
 
 [workspace]
 resolver = "2"

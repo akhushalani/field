@@ -41,6 +41,7 @@ import { useSessionSharedNoteIds } from "~/shared-notes/event-keys";
 import { type Tab, useTabs } from "~/store/zustand/tabs";
 import { useListener } from "~/stt/contexts";
 import { ScheduledSessionAutoStart } from "~/stt/scheduled-session-auto-start";
+import { MeetingBoard } from "~/whiteboard";
 
 export function TabContentNote({
   standaloneWindow = false,
@@ -159,6 +160,9 @@ function TabContentNoteInner({
   const noteInputRef = React.useRef<NoteInputHandle>(null);
 
   const sessionId = tab.id;
+  const [boardSession, setBoardSession] = React.useState<string | null>(null);
+  const [boardVisible, setBoardVisible] = React.useState(false);
+  const showBoard = boardSession === sessionId && boardVisible;
   const [editingTranscriptSessionId, setEditingTranscriptSessionId] =
     React.useState<string | null>(null);
   const transcriptEditMode = editingTranscriptSessionId === sessionId;
@@ -216,7 +220,7 @@ function TabContentNoteInner({
   useAutoFocusEditor({
     sessionId,
     noteInputRef,
-    enabled: !lockOverlay,
+    enabled: !lockOverlay && !showBoard,
   });
 
   const showTopAudioPlayer = shouldShowSessionTopAudioPlayer({
@@ -254,6 +258,7 @@ function TabContentNoteInner({
       enabled:
         tab.active &&
         !lockOverlay &&
+        !showBoard &&
         currentView.type === "transcript" &&
         transcriptEditMode,
       enableOnContentEditable: true,
@@ -302,6 +307,21 @@ function TabContentNoteInner({
         }
       >
         <div className="flex h-full min-h-0 flex-col">
+          {!lockOverlay && session ? (
+            <div className="flex shrink-0 justify-end px-2 py-2">
+              <button
+                type="button"
+                aria-pressed={showBoard}
+                className="rounded-lg border border-neutral-200 px-3 py-1.5 text-sm"
+                onClick={() => {
+                  setBoardSession(sessionId);
+                  setBoardVisible(!showBoard);
+                }}
+              >
+                {showBoard ? "Show notes" : "Open meeting board"}
+              </button>
+            </div>
+          ) : null}
           {!lockOverlay ? (
             <>
               <NoteConflictBanner sessionId={sessionId} />
@@ -318,7 +338,16 @@ function TabContentNoteInner({
               </div>
             </div>
           ) : null}
-          <div className="min-h-0 flex-1">
+          {boardSession === sessionId ? (
+            <div className="min-h-0 flex-1" hidden={!showBoard}>
+              <MeetingBoard
+                key={sessionId}
+                meetingId={sessionId}
+                enabled={!lockOverlay}
+              />
+            </div>
+          ) : null}
+          <div className="min-h-0 flex-1" hidden={showBoard}>
             {session ? (
               <NoteInput
                 ref={noteInputRef}

@@ -31,6 +31,8 @@ if (command === "run" || command === "build") {
 }
 
 function signBinary(binary) {
+  const identifier =
+    process.env.ANARLOG_DEV_APP_IDENTIFIER || "com.hyprnote.dev";
   const scriptDirectory = dirname(scriptPath);
   const entitlements = resolve(
     scriptDirectory,
@@ -43,9 +45,9 @@ function signBinary(binary) {
       "--sign",
       "-",
       "--identifier",
-      "com.hyprnote.dev",
+      identifier,
       "--requirements",
-      '=designated => identifier "com.hyprnote.dev"',
+      `=designated => identifier "${identifier}"`,
       "--entitlements",
       entitlements,
       binary,
