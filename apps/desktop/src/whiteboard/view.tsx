@@ -1,21 +1,28 @@
-import { useState } from "react";
+import { Component, lazy, type ReactNode, Suspense, useState } from "react";
 
 import type { Idea } from "./core";
+import { EvidencePanel } from "./evidence-panel";
 import type { useBoard } from "./use-board";
+
+const BoardCanvas = lazy(() => import("./canvas"));
 
 export function MeetingBoardView({
   state,
   enabled,
+  storageNotice = "Saved on this Mac",
 }: {
   state: ReturnType<typeof useBoard>;
   enabled: boolean;
+  storageNotice?: string;
 }) {
   const [selected, setSelected] = useState<string | null>(null);
+  const [view, setView] = useState<"cards" | "canvas">("cards");
+  const visible = state.board.ideas.filter((idea) => !idea.hidden);
   const groups = new Map<string, Idea[]>();
-  for (const idea of state.board.ideas.filter((idea) => !idea.hidden)) {
+  for (const idea of visible) {
     groups.set(idea.topic, [...(groups.get(idea.topic) ?? []), idea]);
   }
-  const inspected = state.board.ideas.find((idea) => idea.id === selected);
+  const inspected = visible.find((idea) => idea.id === selected);
   return (
     <section
       aria-label="Meeting whiteboard"
@@ -28,9 +35,28 @@ export function MeetingBoardView({
             {state.updating
               ? "Updating from the conversation…"
               : state.running
-                ? "Listening for new ideas · updates about every 10 seconds"
+                ? state.evidence.length
+                  ? "Following the transcript · updates about every 10 seconds"
+                  : "Waiting for transcript · start recording to add ideas"
                 : "Board updates paused"}
           </p>
+        </div>
+        <div
+          role="group"
+          aria-label="Board view"
+          className="flex rounded-lg border border-neutral-300 bg-white p-1 text-sm"
+        >
+          {(["cards", "canvas"] as const).map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              aria-pressed={view === mode}
+              className={`rounded px-3 py-1 capitalize ${view === mode ? "bg-neutral-900 text-white" : "text-neutral-600"}`}
+              onClick={() => setView(mode)}
+            >
+              {mode}
+            </button>
+          ))}
         </div>
         <button
           type="button"
@@ -76,6 +102,63 @@ export function MeetingBoardView({
               and the current board to your selected model.
             </p>
           </div>
+        ) : view === "canvas" ? (
+          <div className="flex h-full min-h-96 gap-4">
+            <div className="min-w-0 flex-1 overflow-hidden rounded-xl border border-neutral-200">
+              <CanvasBoundary>
+                <Suspense
+                  fallback={
+                    <p role="status" className="p-5 text-sm">
+                      Opening canvas…
+                    </p>
+                  }
+                >
+                  <BoardCanvas board={state.board} onSelect={setSelected} />
+                </Suspense>
+              </CanvasBoundary>
+            </div>
+            <div className="w-80 shrink-0 overflow-auto">
+              <label className="block text-sm font-medium">
+                Choose a board card
+                <select
+                  aria-label="Choose a board card"
+                  className="mt-2 mb-4 w-full rounded-lg border border-neutral-300 bg-white p-2 text-sm"
+                  value={inspected?.id ?? ""}
+                  onChange={(event) => setSelected(event.target.value || null)}
+                >
+                  <option value="">Select a card…</option>
+                  {visible.map((idea) => (
+                    <option key={idea.id} value={idea.id}>
+                      {idea.text}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {inspected ? (
+                <>
+                  <IdeaCard
+                    key={inspected.id}
+                    idea={inspected}
+                    disabled={state.busy}
+                    onEdit={state.edit}
+                    onHide={state.hide}
+                    onRelease={state.release}
+                    onInspect={() => setSelected(inspected.id)}
+                  />
+                  <EvidencePanel
+                    idea={inspected}
+                    evidence={state.evidence}
+                    onClose={() => setSelected(null)}
+                  />
+                </>
+              ) : (
+                <p className="text-sm leading-relaxed text-neutral-600">
+                  Select a card on the canvas or from the list to edit it and
+                  inspect its evidence.
+                </p>
+              )}
+            </div>
+          </div>
         ) : (
           <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 xl:grid-cols-3">
             {[...groups].map(([topic, ideas]) => (
@@ -100,51 +183,39 @@ export function MeetingBoardView({
             ))}
           </div>
         )}
-        {inspected && (
-          <aside
-            aria-label="Transcript evidence"
-            className="mt-6 rounded-xl border border-neutral-300 bg-white p-4"
-          >
-            <div className="flex items-center justify-between gap-4">
-              <h3 className="font-semibold">From the conversation</h3>
-              <button
-                type="button"
-                onClick={() => setSelected(null)}
-                className="rounded px-2 py-1 text-sm underline"
-              >
-                Close evidence
-              </button>
-            </div>
-            <p className="mt-2 text-sm font-medium">{inspected.text}</p>
-            {inspected.sourceIds.map((id) => {
-              const source = state.evidence.find((item) => item.id === id);
-              return (
-                <blockquote
-                  key={id}
-                  className="mt-3 border-l-2 border-neutral-300 pl-3 text-sm leading-relaxed"
-                >
-                  {source ? (
-                    <>
-                      <time className="mr-2 text-xs text-neutral-500">
-                        {new Date(source.startMs).toLocaleTimeString()}
-                      </time>
-                      {source.text}
-                    </>
-                  ) : (
-                    "This excerpt is no longer available in the transcript."
-                  )}
-                </blockquote>
-              );
-            })}
-          </aside>
+        {view === "cards" && inspected && (
+          <EvidencePanel
+            idea={inspected}
+            evidence={state.evidence}
+            onClose={() => setSelected(null)}
+          />
         )}
       </div>
       <div className="border-t border-neutral-200 px-5 py-2 text-xs text-neutral-500">
-        Revision {state.board.revision} · Saved on this Mac
+        Revision {state.board.revision} · {storageNotice}
         {state.busy ? " · Saving…" : ""}
       </div>
     </section>
   );
+}
+
+class CanvasBoundary extends Component<
+  { children: ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  render() {
+    return this.state.failed ? (
+      <p role="alert" className="p-5 text-sm">
+        Canvas couldn’t open. Switch to Cards to keep working.
+      </p>
+    ) : (
+      this.props.children
+    );
+  }
 }
 
 function IdeaCard({

@@ -1,0 +1,15 @@
+This is a synthetic meeting for testing a live whiteboard. All examples are fictional.
+
+Let's start with the room. One shared screen should be enough for our first pilot. The host can control it from their Mac. We don't need everyone to join from a separate device yet.
+
+What should appear on the board? I would like the substantive ideas, unresolved questions, explicit decisions, and next steps. We should avoid displaying every sentence. A transcript is useful, but the room needs something it can glance at.
+
+Let's make one decision now. Keep the meeting data on this Mac. We are comfortable sending transcript excerpts to a cloud model for quality. The host should choose that provider in the app.
+
+We also need a way to correct the board. Suppose it writes that every participant needs their own screen. That would be wrong. The decision is one shared screen, controlled by the host. If someone corrects or keeps a card, the model should preserve it. They should also be able to release that protection later.
+
+I initially thought we should keep fixed columns called ideas, questions, and actions. Actually, that might be too rigid. If the discussion moves toward onboarding, group the relevant cards under onboarding. If two topics converge, the board should be able to merge them. The existing layout should not dictate the rest of the meeting.
+
+Let's park the question of multiple screens. We have not decided whether to support that later. For the first experiment, try the board in a short internal meeting. Afterwards, check whether the decisions and loose ends were captured, whether the board interrupted anyone, and whether reopening the meeting restores the board.
+
+One last issue: if the model fails, recording should continue. Pause board updates, keep the saved board visible, and let the host resume when the provider works again. That's enough for this first test.

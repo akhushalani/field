@@ -232,6 +232,7 @@ function TabContentNoteInner({
 
   const handleTabChange = React.useCallback(
     (view: typeof currentView) => {
+      setBoardVisible(false);
       if (view.type !== "transcript") {
         blurActiveTranscriptEditor();
         setEditingTranscriptSessionId(null);
@@ -343,7 +344,7 @@ function TabContentNoteInner({
               <MeetingBoard
                 key={sessionId}
                 meetingId={sessionId}
-                enabled={!lockOverlay}
+                enabled={Boolean(session) && !lockOverlay}
               />
             </div>
           ) : null}

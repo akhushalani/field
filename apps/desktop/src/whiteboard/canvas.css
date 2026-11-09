@@ -1,0 +1,4 @@
+/* The host's controls serve this read-only projection; keep the SDK dock clear. */
+.meetingboard-canvas .excalidraw .App-bottom-bar {
+  display: none;
+}

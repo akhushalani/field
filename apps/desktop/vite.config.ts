@@ -4,11 +4,15 @@ import { lingui, linguiTransformerBabelPreset } from "@lingui/vite-plugin";
 import babel from "@rolldown/plugin-babel";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
+import { fileURLToPath } from "node:url";
 import { defineConfig, type UserConfig } from "vite";
 
 import { relayShim } from "@anlg/plugin-relay/vite";
 
 import { changelog } from "./plugins/changelog";
+import { prepareWhiteboardFonts } from "./plugins/whiteboard-assets";
+
+prepareWhiteboardFonts(fileURLToPath(new URL("./public", import.meta.url)));
 
 const host = process.env.TAURI_DEV_HOST;
 

@@ -6,6 +6,7 @@ const env = {
   ...process.env,
   ANARLOG_DISABLE_SENTRY: "1",
   ANARLOG_DEV_APP_IDENTIFIER: "ai.thrad.meetingboard.dev",
+  RELAY_PORT: "1431",
   CARGO_BUILD_JOBS: process.env.CARGO_BUILD_JOBS || "2",
 };
 delete env.POSTHOG_API_KEY;
@@ -37,6 +38,8 @@ const child = spawn(
     "tauri",
     "dev",
     "--no-watch",
+    "--features",
+    "dev",
     "--config",
     "src-tauri/tauri.thrad.conf.json",
   ],

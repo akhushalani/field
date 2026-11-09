@@ -3,7 +3,7 @@
 Primary foundation: `fastrepl/anarlog` at `0a97fcd408aa62230484787e462be4b56bd4f1ee`.
 Reference foundation: `estebanstifli/Meet2Notes` at `b75077e588f5623d48d9c9bac05aa428b4257c52`, forked separately as `akhushalani/meet2notes-reference`.
 
-This branch contains the semantic board engine, a structured-board view, a live transcript adapter, selected-model integration, and local SQLite revision persistence. It is development groundwork, not a completed native pilot. The original foundation gate remains open until the Mac app builds and recording, transcription, notes, exports, MCP, latency and restart recovery have been exercised on the isolated profile. Excalidraw, ELK layout, a full 20-minute model-quality replay and board-specific MCP/export remain pending.
+This branch contains the semantic board engine, Cards and Canvas views, a live transcript adapter, selected-model integration, and local SQLite revision persistence. Canvas uses Excalidraw with ELK layout in a worker. It is development groundwork, not a completed native pilot. The original foundation gate remains open until the Mac app builds and recording, transcription, notes, exports, MCP, latency and restart recovery have been exercised on the isolated profile. A full 20-minute model-quality replay and board-specific MCP/export remain pending.
 
 ## Run the isolated app
 
@@ -16,6 +16,10 @@ node scripts/dev-meetingboard.mjs
 ```
 
 The launcher uses `ai.thrad.meetingboard.dev`, a separate development signing identity, and the corresponding development data directory. It disables Sentry, omits the analytics key, disables updater delivery and removes inherited CloudSync configuration. This isolation is for `tauri dev`; do not assume an ordinary release build uses the same data-directory rules. Do not point this fork at an existing Anarlog vault.
+
+The upstream `dev` feature also enables its existing file-backed audio provider. It remains inactive unless `MOCK_AUDIO` is set. For a silent synthetic capture test, set `MOCK_AUDIO=1`, `MOCK_PLAYBACK=0`, `ANLG_MOCK_MIC_AUDIO` to a generated speech file and `ANLG_MOCK_SPK_AUDIO` to a silence file before launching. This exercises the live stream without recording the room; it does not prove physical microphone or system-audio capture.
+
+The development relay uses `http://127.0.0.1:1431` for this profile, independently of upstream's default relay port. The synthetic UI-only replay remains on port 1430.
 
 Configure a direct AI provider and model in the isolated app's AI settings. Credentials belong in the app, never in this repository or chat. Configure transcription separately if the selected speech provider requires it. Open a meeting, choose **Open meeting board**, and start updates when ready to send transcript excerpts and board content to the selected model. Upstream-hosted model connections are not used by this feature.
 
@@ -37,6 +41,10 @@ pnpm -F @anlg/desktop exec vite --config scripts/whiteboard-preview/vite.config.
 
 The last command serves a clearly labeled, synthetic replay of the actual board view at `http://127.0.0.1:1430`. It does not record audio or call a provider, and changes last until refresh. Its disabled start button is intentional. It is not evidence that native recording, real model quality or restart recovery works.
 
+For a short native audio smoke test on a Mac, run `python3 scripts/make-meetingboard-fixture.py /tmp/meetingboard-proof`. This uses the installed Samantha voice to create speech, silence and a hash/duration manifest without playing sound or recording the room. It is separate from the 20-minute acceptance benchmark.
+
 `meet2notes.fixture.jsonl` is produced by the reference fork's `scripts/export_whiteboard_replay.py`, using Meet2Notes' actual webhook serializer. The offline adapter accepts ordered `live.segment.batch` events, applies segment corrections by stable ID, ignores duplicate delivery and rejects missing batches or cross-meeting input. It exposes no network webhook endpoint.
 
-The structured view is intentionally small enough to validate the transcript → semantic state → revision persistence loop. The planned editable canvas, annotations, relationships and alternative layouts are subsequent work after the foundation gate is cleared.
+Cards and Canvas share one semantic state and revision history. In Canvas, select a card or use the card list to inspect evidence, edit, keep, release or hide it. Pan and zoom use Excalidraw; automatic topic grouping uses ELK in a worker. Canvas geometry is a projection of the board, not a separate editor history. Freehand annotations, manual positioning, relationships, mind-map layout and incremental layout stability remain subsequent work after the foundation gate is cleared.
+
+Excalidraw 0.18.1 and ELK 0.12.1 are pinned. The build copies Excalidraw's supplied font assets and font notices locally; it does not require a font CDN. Library license texts ship in `apps/desktop/public/meetingboard-notices`. Integration follows the [Excalidraw SDK API](https://plus.excalidraw.com/docs/sdk/excalidraw/api/props/excalidraw-api) and [ELK worker API](https://github.com/kieler/elkjs#usage).

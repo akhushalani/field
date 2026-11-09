@@ -134,6 +134,7 @@ function Preview() {
       </div>
       <div className="min-h-0 flex-1">
         <MeetingBoardView
+          storageNotice="Replay only · refresh resets changes"
           enabled={false}
           state={{
             board,
