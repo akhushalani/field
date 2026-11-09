@@ -8,6 +8,8 @@ const env = {
   ANARLOG_DEV_APP_IDENTIFIER: "ai.thrad.meetingboard.dev",
   RELAY_PORT: "1431",
   CARGO_BUILD_JOBS: process.env.CARGO_BUILD_JOBS || "2",
+  CARGO_PROFILE_DEV_DEBUG: process.env.CARGO_PROFILE_DEV_DEBUG || "0",
+  CARGO_PROFILE_DEV_STRIP: process.env.CARGO_PROFILE_DEV_STRIP || "none",
 };
 delete env.POSTHOG_API_KEY;
 for (const key of Object.keys(env)) {

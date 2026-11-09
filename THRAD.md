@@ -15,6 +15,8 @@ pnpm -F @anlg/ui build
 node scripts/dev-meetingboard.mjs
 ```
 
+The isolated launcher defaults to two Cargo jobs, no Rust debug symbols, and no symbol stripping. These match the native proof profile and keep subsequent launches on the same build cache; explicit `CARGO_BUILD_JOBS`, `CARGO_PROFILE_DEV_DEBUG` and `CARGO_PROFILE_DEV_STRIP` overrides remain available.
+
 The launcher uses `ai.thrad.meetingboard.dev`, a separate development signing identity, and the corresponding development data directory. It disables Sentry, omits the analytics key, disables updater delivery and removes inherited CloudSync configuration. This isolation is for `tauri dev`; do not assume an ordinary release build uses the same data-directory rules. Do not point this fork at an existing Anarlog vault.
 
 The upstream `dev` feature also enables its existing file-backed audio provider. It remains inactive unless `MOCK_AUDIO` is set. For a silent synthetic capture test, set `MOCK_AUDIO=1`, `MOCK_PLAYBACK=0`, `ANLG_MOCK_MIC_AUDIO` to a generated speech file and `ANLG_MOCK_SPK_AUDIO` to a silence file before launching. This exercises the live stream without recording the room; it does not prove physical microphone or system-audio capture.
