@@ -47,6 +47,7 @@ vi.mock("./use-board", () => ({
 
 test("host can inspect evidence and correct or keep an idea without leaving the board", () => {
   render(<MeetingBoard meetingId="meeting" enabled />);
+  fireEvent.click(screen.getByRole("button", { name: "One shared display" }));
   fireEvent.click(screen.getByRole("button", { name: "Evidence" }));
   expect(
     screen.getByText("We decided on one screen in the room."),

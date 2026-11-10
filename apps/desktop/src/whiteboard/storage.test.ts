@@ -2,6 +2,7 @@ import { DatabaseSync } from "node:sqlite";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 
 import migrationSql from "../../../../crates/db-app/migrations/20261109090000_local_meeting_boards.sql?raw";
+import type { Board } from "./core";
 import { persistBoard, readBoardHistory } from "./storage";
 
 let sqlite: DatabaseSync;
@@ -44,7 +45,33 @@ afterEach(() => sqlite.close());
 test("board history survives reload, rejects concurrent revisions, and follows session deletion", async () => {
   const first = { meetingId: "meeting", revision: 1, ideas: [] };
   await persistBoard(first, 0);
-  await persistBoard({ ...first, revision: 2 }, 1);
+  const second: Board = {
+    ...first,
+    revision: 2,
+    ideas: [
+      {
+        id: "screen",
+        text: "Keep the pilot on one shared screen",
+        label: "One shared screen",
+        topic: "Pilot",
+        kind: "decision",
+        sourceIds: ["source"],
+        edited: true,
+        hidden: false,
+      },
+    ],
+    discussion: {
+      title: "Pilot setup",
+      mode: "decide",
+      ideaIds: ["screen"],
+      options: [],
+      links: [],
+      decisionId: "screen",
+      edited: true,
+    },
+  };
+  await persistBoard(second, 1);
+  expect(await readBoardHistory("meeting")).toEqual([first, second]);
   await expect(persistBoard({ ...first, revision: 3 }, 1)).rejects.toThrow(
     "Conflict",
   );

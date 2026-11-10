@@ -4,6 +4,8 @@ import {
   applyModelPatch,
   type Board,
   editIdea,
+  editDiscussion,
+  type Discussion,
   hideIdea,
   releaseIdea,
 } from "./core";
@@ -187,6 +189,16 @@ export function useBoard(meetingId: string, enabled: boolean) {
     toggle: () => {
       setError(null);
       setRunning((value) => !value);
+    },
+    reshape: (discussion: Omit<Discussion, "edited">) =>
+      change(editDiscussion(current.current, discussion)),
+    releaseStructure: () => {
+      if (current.current.discussion)
+        change({
+          ...current.current,
+          revision: current.current.revision + 1,
+          discussion: { ...current.current.discussion, edited: false },
+        });
     },
     edit: (id: string, text: string) =>
       change(editIdea(current.current, id, text)),

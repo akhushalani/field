@@ -1,6 +1,7 @@
 import { Component, lazy, type ReactNode, Suspense, useState } from "react";
 
 import type { Idea } from "./core";
+import { DiscussionRegion } from "./discussion";
 import { EvidencePanel } from "./evidence-panel";
 import type { useBoard } from "./use-board";
 
@@ -11,12 +12,15 @@ export function MeetingBoardView({
   enabled,
   storageNotice = "Saved on this Mac",
 }: {
-  state: ReturnType<typeof useBoard>;
+  state: Omit<ReturnType<typeof useBoard>, "reshape" | "releaseStructure"> &
+    Partial<Pick<ReturnType<typeof useBoard>, "reshape" | "releaseStructure">>;
   enabled: boolean;
   storageNotice?: string;
 }) {
   const [selected, setSelected] = useState<string | null>(null);
-  const [view, setView] = useState<"cards" | "canvas">("cards");
+  const [view, setView] = useState<"discussion" | "cards" | "canvas">(
+    "discussion",
+  );
   const visible = state.board.ideas.filter((idea) => !idea.hidden);
   const groups = new Map<string, Idea[]>();
   for (const idea of visible) {
@@ -46,7 +50,7 @@ export function MeetingBoardView({
           aria-label="Board view"
           className="flex rounded-lg border border-neutral-300 bg-white p-1 text-sm"
         >
-          {(["cards", "canvas"] as const).map((mode) => (
+          {(["discussion", "cards", "canvas"] as const).map((mode) => (
             <button
               key={mode}
               type="button"
@@ -101,6 +105,46 @@ export function MeetingBoardView({
               Board history stays on this Mac. Updates send transcript excerpts
               and the current board to your selected model.
             </p>
+          </div>
+        ) : view === "discussion" ? (
+          <div className="flex min-h-full flex-wrap gap-5">
+            <div className="min-w-0 flex-1 basis-[600px]">
+              <DiscussionRegion
+                board={state.board}
+                disabled={state.busy || !state.reshape}
+                onChange={(region) => state.reshape?.(region)}
+                onRelease={() => state.releaseStructure?.()}
+                onSelect={setSelected}
+              />
+            </div>
+            {inspected && (
+              <aside
+                aria-label="Selected element"
+                className="w-80 max-w-full shrink-0"
+              >
+                <button
+                  type="button"
+                  className="mb-3 text-sm underline"
+                  onClick={() => setSelected(null)}
+                >
+                  Close detail
+                </button>
+                <IdeaCard
+                  key={inspected.id}
+                  idea={inspected}
+                  disabled={state.busy}
+                  onEdit={state.edit}
+                  onHide={state.hide}
+                  onRelease={state.release}
+                  onInspect={() => setSelected(inspected.id)}
+                />
+                <EvidencePanel
+                  idea={inspected}
+                  evidence={state.evidence}
+                  onClose={() => setSelected(null)}
+                />
+              </aside>
+            )}
           </div>
         ) : view === "canvas" ? (
           <div className="flex h-full min-h-96 gap-4">

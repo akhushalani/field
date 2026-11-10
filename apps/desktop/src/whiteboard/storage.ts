@@ -1,16 +1,19 @@
 import { z } from "zod";
 
 import type { Board } from "./core";
+import { discussionSchema } from "./discussion-schema";
 
 import { executeTransaction, liveQueryClient } from "~/db";
 
 const boardSchema = z.object({
   meetingId: z.string(),
   revision: z.number().int().nonnegative(),
+  discussion: discussionSchema.extend({ edited: z.boolean() }).optional(),
   ideas: z.array(
     z.object({
       id: z.string(),
       text: z.string(),
+      label: z.string().optional(),
       topic: z.string(),
       kind: z.enum(["idea", "question", "decision", "action"]),
       sourceIds: z.array(z.string()),

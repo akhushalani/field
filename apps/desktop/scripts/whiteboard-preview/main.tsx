@@ -7,6 +7,7 @@ import {
   applyModelPatch,
   type Board,
   editIdea,
+  editDiscussion,
   hideIdea,
   releaseIdea,
 } from "../../src/whiteboard/core";
@@ -41,12 +42,35 @@ const evidence = [
 const initial: Board = {
   meetingId: "replay",
   revision: 1,
+  discussion: {
+    title: "How should we run the pilot?",
+    mode: "explore",
+    ideaIds: ["display", "personal", "flow", "structure", "pilot"],
+    options: ["display", "personal"],
+    links: [
+      { from: "flow", to: "display", kind: "supports" },
+      { from: "structure", to: "personal", kind: "challenges" },
+    ],
+    decisionId: "display",
+    edited: false,
+  },
   ideas: [
     {
+      label: "One shared screen",
       id: "display",
       text: "One shared screen, controlled by the host Mac",
       topic: "The meeting room",
       kind: "decision",
+      sourceIds: ["room"],
+      edited: false,
+      hidden: false,
+    },
+    {
+      id: "personal",
+      label: "A screen for everyone",
+      text: "Alternative: each participant opens a board on their device.",
+      topic: "The meeting room",
+      kind: "idea",
       sourceIds: ["room"],
       edited: false,
       hidden: false,
@@ -61,6 +85,7 @@ const initial: Board = {
       hidden: false,
     },
     {
+      label: "Keep the conversation flowing",
       id: "flow",
       text: "Let ideas appear without interrupting the conversation",
       topic: "Keep the flow",
@@ -70,6 +95,7 @@ const initial: Board = {
       hidden: false,
     },
     {
+      label: "Will setup interrupt us?",
       id: "structure",
       text: "How often should the board rethink its structure?",
       topic: "Keep the flow",
@@ -79,6 +105,7 @@ const initial: Board = {
       hidden: false,
     },
     {
+      label: "Try a short internal meeting",
       id: "pilot",
       text: "Try the board in the next Thrad meeting",
       topic: "Next steps",
@@ -146,6 +173,15 @@ function Preview() {
             running: false,
             providerReady: true,
             toggle: () => {},
+            reshape: (region) => change(editDiscussion(board, region)),
+            releaseStructure: () => {
+              if (board.discussion)
+                change({
+                  ...board,
+                  revision: board.revision + 1,
+                  discussion: { ...board.discussion, edited: false },
+                });
+            },
             edit: (id, text) => change(editIdea(board, id, text)),
             hide: (id) => change(hideIdea(board, id)),
             release: (id) => change(releaseIdea(board, id)),

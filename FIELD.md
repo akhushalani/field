@@ -56,3 +56,11 @@ For a short native audio smoke test on a Mac, run `python3 scripts/make-meetingb
 Cards and Canvas share one semantic state and revision history. In Canvas, select a card or use the card list to inspect evidence, edit, keep, release or hide it. Pan and zoom use Excalidraw; automatic topic grouping uses ELK in a worker. Canvas geometry is a projection of the board, not a separate editor history. Freehand annotations, manual positioning, relationships, mind-map layout and incremental layout stability remain subsequent work after the foundation gate is cleared.
 
 Excalidraw 0.18.1 and ELK 0.12.1 are pinned. The build copies Excalidraw's supplied font assets and font notices locally; it does not require a font CDN. Library license texts ship in `apps/desktop/public/meetingboard-notices`. Integration follows the [Excalidraw SDK API](https://plus.excalidraw.com/docs/sdk/excalidraw/api/props/excalidraw-api) and [ELK worker API](https://github.com/kieler/elkjs#usage).
+
+## Evolving discussion region
+
+Discussion is now the default board surface. A single region uses stable idea IDs across Explore (branches and typed relationships), Compare (options with For/Against/Needs), and Decision (explicit choice, rationale, open questions and next steps). Labels are short; selecting an element opens its full text and transcript evidence. The existing Cards and Canvas views remain available.
+
+The model can propose the region and change its form as the conversation develops. The host can change forms, edit the central question, choose alternatives, add or remove relationships, and edit/keep individual elements. Structural edits protect the region until **Release structure**; idea protection remains independent. Compare requires at least two alternatives and Decision requires an evidence-backed decision. Switching forms retains the underlying ideas and relationships. History persists the region inside the existing local revision JSON, with no schema migration; older boards open as an exploration until a structure is supplied.
+
+This iteration has one focused region and a bounded automatic layout, not freehand drawing or manual node positioning. The preview is synthetic; its relationships illustrate the interface rather than establish meeting facts. New live-model structural quality still needs a meeting evaluation.
