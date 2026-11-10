@@ -5,7 +5,7 @@ Field is the product name. The existing `ai.thrad.meetingboard.dev` signing iden
 Primary foundation: `fastrepl/anarlog` at `0a97fcd408aa62230484787e462be4b56bd4f1ee`.
 Reference foundation: `estebanstifli/Meet2Notes` at `b75077e588f5623d48d9c9bac05aa428b4257c52`, forked separately as `akhushalani/meet2notes-reference`.
 
-This branch contains the semantic board engine, Cards and Canvas views, a live transcript adapter, selected-model integration, and local SQLite revision persistence. Canvas uses Excalidraw with ELK layout in a worker. It is development groundwork, not a completed native pilot. The original foundation gate remains open until the Mac app builds and recording, transcription, notes, exports, MCP, latency and restart recovery have been exercised on the isolated profile. A full 20-minute model-quality replay and board-specific MCP/export remain pending.
+This branch contains the semantic board engine, Cards and Canvas views, a live transcript adapter, selected-model integration, and local SQLite revision persistence. Canvas uses Excalidraw with ELK layout in a worker. A native synthetic smoke test now passes on the isolated Mac profile: file-backed capture, cloud transcription, live model updates and regrouping, notes generation, Markdown/JSON exports, local MCP reads, evidence inspection, protected edits, Hide, Undo and idle app restart recovery. The 105-second speech fixture produced 326 transcript words; the test saved 13 board revisions including host changes. Physical microphone/system-audio capture, a full 20-minute model-quality and latency evaluation, and board-specific MCP/export remain pending; this is not yet a completed room pilot.
 
 ## Run the isolated app
 

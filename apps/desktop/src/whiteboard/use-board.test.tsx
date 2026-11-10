@@ -83,6 +83,48 @@ test("pausing cancels an in-flight update and ignores its late result", async ()
   unmount();
 }, 20_000);
 
+test("a model failure pauses updates while retaining the saved board and incoming transcript", async () => {
+  const saved: Board = {
+    meetingId: "meeting",
+    revision: 1,
+    ideas: [
+      {
+        id: "screen",
+        text: "Use one shared screen",
+        topic: "Room",
+        kind: "idea",
+        sourceIds: ["transcript:w1"],
+        edited: true,
+        hidden: false,
+      },
+    ],
+  };
+  mocks.history = [saved];
+  mocks.propose.mockRejectedValue(new Error("Provider unavailable"));
+  const { result, rerender, unmount } = renderHook(() =>
+    useBoard("meeting", true),
+  );
+  await waitFor(() => expect(result.current.ready).toBe(true));
+  act(() => result.current.toggle());
+  await waitFor(() => expect(result.current.error).not.toBeNull());
+  expect(result.current.running).toBe(false);
+  expect(result.current.board).toEqual(saved);
+  expect(mocks.persist).not.toHaveBeenCalled();
+  mocks.transcripts = [
+    {
+      ...mocks.transcripts[0]!,
+      words: [
+        ...mocks.transcripts[0]!.words,
+        { id: "w2", text: "Keep recording", start_ms: 1000, end_ms: 2000 },
+      ],
+    },
+  ];
+  rerender();
+  expect(result.current.evidence[0]?.text).toContain("Keep recording");
+  expect(result.current.running).toBe(false);
+  unmount();
+}, 20_000);
+
 test("a source correction invalidates a late removal as well as a late upsert", async () => {
   mocks.history = [
     {

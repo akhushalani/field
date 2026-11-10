@@ -336,6 +336,31 @@ describe("transcript SQLite queries", () => {
     );
   });
 
+  it("executes the remote participant query and excludes the owner's email aliases", async () => {
+    const db = new DatabaseSync(":memory:");
+    try {
+      db.exec(`
+        CREATE TABLE sessions (id TEXT, owner_user_id TEXT);
+        CREATE TABLE humans (id TEXT, email TEXT, metadata_json TEXT, deleted_at TEXT);
+        CREATE TABLE session_participants (session_id TEXT, human_id TEXT, email TEXT, source TEXT, deleted_at TEXT);
+        INSERT INTO sessions VALUES ('session-1', 'owner');
+        INSERT INTO humans VALUES ('owner', 'self@example.test', '{"additionalEmails":["alias@example.test"]}', NULL);
+        INSERT INTO session_participants VALUES
+          ('session-1', 'self-copy', 'self@example.test', 'calendar', NULL),
+          ('session-1', 'alias-copy', 'alias@example.test', 'calendar', NULL),
+          ('session-1', 'remote', 'remote@example.test', 'calendar', NULL);
+      `);
+      mocks.execute.mockImplementationOnce((sql: string, params: string[]) =>
+        Promise.resolve(db.prepare(sql).all(...params)),
+      );
+      await expect(getSessionParticipantHumanIds("session-1")).resolves.toEqual(
+        ["remote"],
+      );
+    } finally {
+      db.close();
+    }
+  });
+
   it("returns no named humans without querying when there are no ids", async () => {
     await expect(getTranscriptHumans([])).resolves.toEqual([]);
     expect(mocks.execute).not.toHaveBeenCalled();

@@ -4,10 +4,7 @@ import { useMemo } from "react";
 import { sharedNoteEventKey } from "./event-key";
 
 import { useAuth } from "~/auth";
-import {
-  SESSION_EVENT_MATCH,
-  SESSION_EVENT_ORDER,
-} from "~/calendar/session-event-match";
+import { SESSION_EVENT_MATCH } from "~/calendar/session-event-match";
 import { executeTransaction, useLiveQuery } from "~/db";
 import { enqueueDatabaseWrite } from "~/db/write-queue";
 import { useDurableSharedNotes } from "~/shared-notes/cache";
@@ -19,10 +16,14 @@ const MATCHED_EVENT_SELECT = `
   SELECT matched.tracking_id_event, matched.started_at
   FROM sessions AS session
   JOIN events AS matched ON matched.id = (
-    SELECT event.id
-    FROM events AS event
-    WHERE ${SESSION_EVENT_MATCH}
-    ORDER BY ${SESSION_EVENT_ORDER}
+    SELECT candidate.id
+    FROM (
+      SELECT event.id, event.started_at,
+        CASE WHEN event.id = session.event_id THEN 0 ELSE 1 END AS priority
+      FROM events AS event
+      WHERE ${SESSION_EVENT_MATCH}
+    ) AS candidate
+    ORDER BY candidate.priority, candidate.started_at, candidate.id
     LIMIT 1
   )
 `;
